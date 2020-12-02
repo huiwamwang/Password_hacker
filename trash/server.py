@@ -18,6 +18,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         if not data:
             break
         elif password == data.decode():
-            conn.sendall(f'You did it! Such a tiger!\n{password}'.encode())
+            conn.sendall(b'Connection success!')
             break
         conn.send(data)

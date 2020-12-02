@@ -20,8 +20,11 @@ class PasswordHacker:
                 for password in itertools.product(password_letters, repeat=i):
                     password = ''.join(password)
                     c.send(password.encode())
-                    print(c.recv(1024).decode())
+                    if c.recv(1024) == b'Connection success!':
+                        print(password)
+                        exit()
 
 
 if __name__ == '__main__':
     PasswordHacker()
+
