@@ -11,7 +11,6 @@ class PasswordHacker:
         self.send_receive()
         self.login = None
         self.password = None
-        self.generator = None
 
     def send_receive(self):
 
@@ -27,8 +26,8 @@ class PasswordHacker:
                         if dictionary_rcv['result'] == 'Wrong password!':
                             self.login = l.strip()
                             print(self.login)
-                            self.generator = self.brute_force()
-                            for i in self.generator:
+                            ascii_symbols = ascii_lowercase + ascii_uppercase + digits
+                            for i in ascii_symbols:
                                 dict_with_password = {"login": self.login, "password": i}
                                 print(dict_with_password)
                                 c.send((json.dumps(dict_with_password)).encode())
@@ -41,11 +40,6 @@ class PasswordHacker:
                                 elif dict_pass_rcv['result'] == 'Connection success!':
                                     print('Login:', self.login, 'Password:', self.password)
                                     exit()
-
-    def brute_force(self):
-        ascii_symbols = ascii_lowercase + ascii_uppercase + digits
-        for i in ascii_symbols:
-            yield i
 
 
 if __name__ == '__main__':
